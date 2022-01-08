@@ -1,0 +1,1 @@
+6bbccc560658e77a15c69f90820749d99a4da212c30e01def80acd7c016428a8  my_first_contract-aarch64.wasm
