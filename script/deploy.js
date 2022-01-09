@@ -83,3 +83,8 @@ const {
 } = instantiateTxResult.logs[0].eventsByType;
 
 console.log(contract_address)
+
+const result = await terra.wasm.contractQuery(
+  contract_address[0],
+  { GetConfig: { } } // query msg
+);
