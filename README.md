@@ -104,4 +104,10 @@ Workspace contains:
 
 Follow [Gitpod Getting Started](https://www.gitpod.io/docs/getting-started) and launch your workspace.
 
-terra1sh36qn08g4cqg685cfzmyxqv2952q6r8gpczrt
+### Deployed
+***Bombay***
+code_id: 32354
+contract addresses: [
+  'terra1n8mxhm0uau2kg7rgdcagp9lywgfmlj3uy0cs7w',
+]
+
