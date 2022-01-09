@@ -70,16 +70,16 @@ console.log(wallet.key.accAddress, 'addresser')
 const instantiate = new MsgInstantiateContract(
   wallet.key.accAddress,
   wallet.key.accAddress,
-  code_id[0], // code ID
+  +code_id[0], // code ID
   {
-    owner: wallet.key.accAddress,
     receiver: wallet.key.accAddress,
+    token: wallet.key.accAddress,
   }, // InitMsg
 );
 
-// const instantiateTx = await wallet.createAndSignTx({
-//   msgs: [instantiate],
-// });
+const instantiateTx = await wallet.createAndSignTx({
+  msgs: [instantiate],
+});
 // const instantiateTxResult = await terra.tx.broadcast(instantiateTx);
 
 // console.log(instantiateTxResult);
