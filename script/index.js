@@ -80,18 +80,18 @@ const instantiate = new MsgInstantiateContract(
 const instantiateTx = await wallet.createAndSignTx({
   msgs: [instantiate],
 });
-// const instantiateTxResult = await terra.tx.broadcast(instantiateTx);
+const instantiateTxResult = await terra.tx.broadcast(instantiateTx);
 
-// console.log(instantiateTxResult);
+console.log(instantiateTxResult);
 
-// if (isTxError(instantiateTxResult)) {
-//   throw new Error(
-//     `instantiate failed. code: ${instantiateTxResult.code}, codespace: ${instantiateTxResult.codespace}, raw_log: ${instantiateTxResult.raw_log}`
-//   );
-// }
+if (isTxError(instantiateTxResult)) {
+  throw new Error(
+    `instantiate failed. code: ${instantiateTxResult.code}, codespace: ${instantiateTxResult.codespace}, raw_log: ${instantiateTxResult.raw_log}`
+  );
+}
 
-// const {
-//   instantiate_contract: { contract_address },
-// } = instantiateTxResult.logs[0].eventsByType;
+const {
+  instantiate_contract: { contract_address },
+} = instantiateTxResult.logs[0].eventsByType;
 
-// console.log(contract_address)
+console.log(contract_address)
