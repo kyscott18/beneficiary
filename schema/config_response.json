@@ -1,12 +1,20 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "InstantiateMsg",
+  "title": "ConfigResponse",
   "type": "object",
   "required": [
+    "owner",
+    "pause",
     "receiver",
     "token"
   ],
   "properties": {
+    "owner": {
+      "type": "string"
+    },
+    "pause": {
+      "type": "boolean"
+    },
     "receiver": {
       "type": "string"
     },

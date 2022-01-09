@@ -5,10 +5,10 @@
     {
       "type": "object",
       "required": [
-        "increment"
+        "do"
       ],
       "properties": {
-        "increment": {
+        "do": {
           "type": "object"
         }
       },
@@ -17,18 +17,35 @@
     {
       "type": "object",
       "required": [
-        "reset"
+        "update_config"
       ],
       "properties": {
-        "reset": {
+        "update_config": {
           "type": "object",
-          "required": [
-            "count"
-          ],
           "properties": {
-            "count": {
-              "type": "integer",
-              "format": "int32"
+            "owner": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "pause": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "receiver": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "token": {
+              "type": [
+                "string",
+                "null"
+              ]
             }
           }
         }
