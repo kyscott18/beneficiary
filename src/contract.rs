@@ -6,6 +6,10 @@ use cosmwasm_std::{
 };
 use cosmwasm_bignumber::Uint256;
 use cw20::Cw20ExecuteMsg;
+use terraswap::asset::{
+  Asset,
+  AssetInfo,
+};
 
 use crate::error::ContractError;
 use crate::msg::{BalanceResponse, ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
@@ -14,6 +18,7 @@ use crate::tax_utils::deduct_tax;
 use crate::token_utils::balance_of;
 use crate::pool_msg;
 use crate::pool_resp;
+use crate::bridge_msg;
 
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -49,6 +54,7 @@ pub fn execute(
           => try_update_config(deps, info, pause, owner, receiver, bank, bridge),
         ExecuteMsg::Bridge { amount, recipient_chain, recipient, nonce }
           => try_bridge(deps, info, amount, recipient_chain, recipient, nonce),
+        ExecuteMsg::ApproveBridge { amount } => try_approve( deps, info, amount),
     }
 }
 
@@ -83,12 +89,45 @@ pub fn try_earn(deps: DepsMut) -> Result<Response, ContractError> {
 
 pub fn try_bridge(
   deps: DepsMut,
-  info: MessageInfo,
+  _info: MessageInfo,
   amount: Uint128,
   recipient_chain: u16,
   recipient: String,
   nonce: u32,
 ) -> Result<Response, ContractError> {
+  let state : Config = CONFIG.load(deps.storage)?;
+
+  if state.pause {
+    return Err(ContractError::Paused {});
+  }
+
+  let res : pool_resp::ConfigResponse = deps.querier.query(
+    &QueryRequest::Wasm(WasmQuery::Smart {
+      contract_addr: deps.api.addr_humanize(&state.bank).unwrap().to_string(),
+      msg: to_binary(&pool_msg::QueryMsg::Config {})?,
+    }))?;
+
+  let token = res.dp_token;
+
+  let info: AssetInfo = AssetInfo::Token { contract_addr: token.clone() };
+  let asset: Asset = Asset { info, amount };
+
+  Ok(Response::new()
+    .add_message(CosmosMsg::Wasm(WasmMsg::Execute {
+      contract_addr: deps.api.addr_humanize(&state.bridge).unwrap().to_string(),
+      msg: to_binary(&bridge_msg::ExecuteMsg::InitiateTransfer {
+        asset,
+        recipient_chain,
+        recipient: to_binary(&recipient)?,
+        fee: Uint128::from(10u64),
+        nonce,
+      })?,
+      funds: vec![],
+    }))
+  )
+}
+
+pub fn try_approve(deps: DepsMut, _info: MessageInfo, amount: Uint128) -> Result<Response, ContractError> {
   let state : Config = CONFIG.load(deps.storage)?;
 
   if state.pause {

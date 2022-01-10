@@ -30,7 +30,7 @@ const mk = new MnemonicKey({
 
 const wallet = terra.wallet(mk);
 
-const contract = "terra1hdgjwnk059ky8altyfxpdtjzx9v3tpyd47l58r"
+const contract = "terra1f2f3z323tpcqq65peyzgdacj9jh37nw6h275m8"
 
 // const execute = new MsgExecuteContract(
 //   wallet.key.accAddress, // sender
