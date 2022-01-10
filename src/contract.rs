@@ -144,7 +144,7 @@ fn query_balance(deps: Deps, env: Env) -> StdResult<BalanceResponse> {
       msg: to_binary(&pool_msg::QueryMsg::Config {})?,
     }))?;
 
-  let token = res.anchor_token;
+  let token = res.dp_token;
 
   let token_balance = balance_of(
     deps,

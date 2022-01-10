@@ -1,1 +1,1 @@
-93391d5910fa5974e14f8509749caa96b6355cd78f115725dd8af78e4db6adec  my_first_contract-aarch64.wasm
+e5b88c73dc0ffc19f4fefb3b2db3cda07efa41719bd3bdc38c5178f937de3d0c  my_first_contract-aarch64.wasm

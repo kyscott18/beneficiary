@@ -30,7 +30,7 @@ const mk = new MnemonicKey({
 
 const wallet = terra.wallet(mk);
 
-const contract = "terra1l0nffzpk8w3u9dnzdfwde7gsnczv70wzgmrk73"
+const contract = "terra1u89v8drpdv4zlepjzp3uhnpk56vmqk0pj7m8aj"
 
 const execute = new MsgExecuteContract(
   wallet.key.accAddress, // sender
@@ -45,7 +45,7 @@ const executeTx = await wallet.createAndSignTx({
 const executeTxResult = await terra.tx.broadcast(executeTx);
 
 let result = await terra.wasm.contractQuery(
-  "terra1wjqhvta9mm20p6p4u65dq5ckg7774qmw308pq2",
+  "terra1u89v8drpdv4zlepjzp3uhnpk56vmqk0pj7m8aj",
   { get_config: { } } // query msg
 );
 
