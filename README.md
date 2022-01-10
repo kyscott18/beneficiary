@@ -111,3 +111,5 @@ contract addresses: [
   'terra1f2f3z323tpcqq65peyzgdacj9jh37nw6h275m8',
 ]
 
+first wormhole tx 6F13E2AE2D55E6A0AC30973F790424366B9920686662BD0BED9E41D96F60AE01
+
