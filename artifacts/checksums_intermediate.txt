@@ -1,1 +1,1 @@
-958a4bf2987af744c33ccd1949c9e759cb4b4ec125c858944b852da8b027b57f  ./target/wasm32-unknown-unknown/release/my_first_contract.wasm
+44116f293c128a2b61493cd5184f93cfd00a7cfd46f3cd13699c668108d18808  ./target/wasm32-unknown-unknown/release/my_first_contract.wasm

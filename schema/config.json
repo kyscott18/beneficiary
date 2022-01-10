@@ -4,12 +4,16 @@
   "type": "object",
   "required": [
     "bank",
+    "bridge",
     "owner",
     "pause",
     "receiver"
   ],
   "properties": {
     "bank": {
+      "$ref": "#/definitions/CanonicalAddr"
+    },
+    "bridge": {
       "$ref": "#/definitions/CanonicalAddr"
     },
     "owner": {

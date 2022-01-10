@@ -1,4 +1,4 @@
-import { LCDClient, MsgInstantiateContract, MsgStoreCode, MnemonicKey, isTxError, Coins} from '@terra-money/terra.js';
+import { LCDClient, MsgExecuteContract, MnemonicKey, isTxError, Coins} from '@terra-money/terra.js';
 import * as fs from 'fs';
 import fetch from 'isomorphic-fetch';
 
@@ -30,9 +30,36 @@ const mk = new MnemonicKey({
 
 const wallet = terra.wallet(mk);
 
-const result = await terra.wasm.contractQuery(
-  "terra1hdgjwnk059ky8altyfxpdtjzx9v3tpyd47l58r",
-  { get_config: { } } // query msg
+const contract = "terra1hdgjwnk059ky8altyfxpdtjzx9v3tpyd47l58r"
+
+const execute = new MsgExecuteContract(
+  wallet.key.accAddress, // sender
+  contract, // contract account address
+  { 
+    bridge: {
+      amount: "5003",
+      recipient_chain: 1,
+      recipient: "",
+      nonce: 3,
+    } 
+  }, // handle msg
 );
 
-console.log(result)
+// const execute = new MsgExecuteContract(
+//   wallet.key.accAddress, // sender
+//   "terra1emqzm6me89rcd4pl93kvts3rpaeczj62nhwnzg", // contract account address
+//   { 
+//     increase_allowance: {
+//       spender: "terra1pseddrv0yfsn76u4zxrjmtf45kdlmalswdv39a",
+//       amount: "100",
+//     } 
+//   }, // handle msg
+// );
+
+const executeTx = await wallet.createAndSignTx({
+  msgs: [execute]
+});
+
+const executeTxResult = await terra.tx.broadcast(executeTx);
+
+console.log(executeTxResult)

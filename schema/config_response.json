@@ -4,12 +4,16 @@
   "type": "object",
   "required": [
     "bank",
+    "bridge",
     "owner",
     "pause",
     "receiver"
   ],
   "properties": {
     "bank": {
+      "type": "string"
+    },
+    "bridge": {
       "type": "string"
     },
     "owner": {

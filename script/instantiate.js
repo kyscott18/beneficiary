@@ -30,7 +30,7 @@ const mk = new MnemonicKey({
 
 const wallet = terra.wallet(mk);
 
-const code_id = 32432; 
+const code_id = 32441; 
 
 const instantiate = new MsgInstantiateContract(
   wallet.key.accAddress,
@@ -39,6 +39,7 @@ const instantiate = new MsgInstantiateContract(
   {
     receiver: wallet.key.accAddress,
     bank: "terra1vt8ln3dn3fu7uceyde6q67annt46cy8jvxwjlq",
+    bridge: "terra1pseddrv0yfsn76u4zxrjmtf45kdlmalswdv39a"
   }, // InitMsg
 );
 

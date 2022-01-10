@@ -2,9 +2,10 @@
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
   to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult, Coin, CosmosMsg, 
-  WasmMsg, WasmQuery, QueryRequest
+  WasmMsg, WasmQuery, QueryRequest, Uint128,
 };
-use cosmwasm_bignumber::{Uint256};
+use cosmwasm_bignumber::Uint256;
+use cw20::Cw20ExecuteMsg;
 
 use crate::error::ContractError;
 use crate::msg::{BalanceResponse, ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
@@ -27,6 +28,7 @@ pub fn instantiate(
       owner: deps.api.addr_canonicalize(info.sender.as_str())?,
       receiver: deps.api.addr_canonicalize(msg.receiver.as_str())?,
       bank: deps.api.addr_canonicalize(msg.bank.as_str())?,
+      bridge:  deps.api.addr_canonicalize(msg.bridge.as_str())?,
     };
 
     CONFIG.save(deps.storage, &config)?;
@@ -42,13 +44,15 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
-        ExecuteMsg::Do {} => try_do(deps),
-        ExecuteMsg::UpdateConfig { pause, owner, receiver, bank }
-          => try_update_config(deps, info, pause, owner, receiver, bank),
+        ExecuteMsg::Earn {} => try_earn(deps),
+        ExecuteMsg::UpdateConfig { pause, owner, receiver, bank, bridge }
+          => try_update_config(deps, info, pause, owner, receiver, bank, bridge),
+        ExecuteMsg::Bridge { amount, recipient_chain, recipient, nonce }
+          => try_bridge(deps, info, amount, recipient_chain, recipient, nonce),
     }
 }
 
-pub fn try_do(deps: DepsMut) -> Result<Response, ContractError> {
+pub fn try_earn(deps: DepsMut) -> Result<Response, ContractError> {
     let config = CONFIG.load(deps.storage)?;
     if config.pause {
       return Err(ContractError::Paused {});
@@ -76,6 +80,42 @@ pub fn try_do(deps: DepsMut) -> Result<Response, ContractError> {
         funds: vec![],
       })))
 }
+
+pub fn try_bridge(
+  deps: DepsMut,
+  info: MessageInfo,
+  amount: Uint128,
+  recipient_chain: u16,
+  recipient: String,
+  nonce: u32,
+) -> Result<Response, ContractError> {
+  let state : Config = CONFIG.load(deps.storage)?;
+
+  if state.pause {
+    return Err(ContractError::Paused {});
+  }
+
+  let res : pool_resp::ConfigResponse = deps.querier.query(
+    &QueryRequest::Wasm(WasmQuery::Smart {
+      contract_addr: deps.api.addr_humanize(&state.bank).unwrap().to_string(),
+      msg: to_binary(&pool_msg::QueryMsg::Config {})?,
+    }))?;
+
+  let token = res.dp_token;
+
+  Ok(Response::new()
+    .add_message(CosmosMsg::Wasm(WasmMsg::Execute {
+      contract_addr: token,
+      msg: to_binary(&Cw20ExecuteMsg::IncreaseAllowance {
+        spender: deps.api.addr_humanize(&state.bridge).unwrap().to_string(),
+        amount: amount,
+        expires: None,
+      })?,
+      funds: vec![],
+    }))
+  )
+}
+
 pub fn try_update_config(
   deps: DepsMut,
   info: MessageInfo,
@@ -83,6 +123,7 @@ pub fn try_update_config(
   owner: Option<String>,
   receiver: Option<String>,
   bank: Option<String>,
+  bridge: Option<String>,
 ) -> Result<Response, ContractError> {
     let mut config: Config = CONFIG.load(deps.storage)?;
 
@@ -112,6 +153,12 @@ pub fn try_update_config(
       config.bank = deps.api.addr_canonicalize(&bank)?;
     }
 
+    if let Some(bridge) = bridge {
+      let _ = deps.api.addr_validate(&bridge)?;
+
+      config.bridge = deps.api.addr_canonicalize(&bridge)?;
+    }
+
     CONFIG.save(deps.storage, &config)?;
 
     Ok(Response::new().add_attribute("action", "update_config"))
@@ -132,6 +179,7 @@ fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
       owner: deps.api.addr_humanize(&state.owner)?.to_string(),
       receiver: deps.api.addr_humanize(&state.receiver)?.to_string(),
       bank: deps.api.addr_humanize(&state.bank)?.to_string(),
+      bridge: deps.api.addr_humanize(&state.bridge)?.to_string(),
     })
 }
 

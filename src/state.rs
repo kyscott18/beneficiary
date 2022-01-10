@@ -10,6 +10,7 @@ pub struct Config {
     pub owner: CanonicalAddr,
     pub receiver: CanonicalAddr,
     pub bank: CanonicalAddr,
+    pub bridge: CanonicalAddr,
 }
 
 pub const CONFIG: Item<Config> = Item::new("config");
