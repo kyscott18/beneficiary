@@ -21,9 +21,9 @@ pub enum ExecuteMsg {
       bank: Option<String>,
       bridge: Option<String>,
     },
-    ApproveBridge {
-      amount: Uint128,
-    },
+    // ApproveBridge {
+    //   amount: Uint128,
+    // },
     Bridge {
       amount: Uint128,
       recipient_chain: u16,

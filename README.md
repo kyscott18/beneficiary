@@ -108,8 +108,9 @@ Follow [Gitpod Getting Started](https://www.gitpod.io/docs/getting-started) and 
 ***Bombay***
 code_id: 32430
 contract addresses: [
-  'terra1f2f3z323tpcqq65peyzgdacj9jh37nw6h275m8',
+  'terra1hf37ztxxne8tlv6dmzl6370ndyjg8f7sxm6mkr',
 ]
 
 first wormhole tx 6F13E2AE2D55E6A0AC30973F790424366B9920686662BD0BED9E41D96F60AE01
-
+second wormhole tx C7F697BD80DFEC5BACF2B564CE3C1E2204BD142317304BBBA8BF7AF34DD233BA
+third wormhole tx 3012FCDCACB9F87A50CCAE0FCCECE46BFCD4F4D954FFF90BEEE68FFFEBCC060B

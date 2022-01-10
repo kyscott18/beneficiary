@@ -30,40 +30,40 @@ const mk = new MnemonicKey({
 
 const wallet = terra.wallet(mk);
 
-const contract = "terra1f2f3z323tpcqq65peyzgdacj9jh37nw6h275m8"
+const contract = "terra1hf37ztxxne8tlv6dmzl6370ndyjg8f7sxm6mkr"
+
+// let execute = new MsgExecuteContract(
+//   wallet.key.accAddress, // sender
+//   contract, // contract account address
+//   { 
+//     approve_bridge: {
+//       amount: "53",
+//     } 
+//   }, // handle msg
+// );
+// let executeTx = await wallet.createAndSignTx({
+//   msgs: [execute]
+// });
+
+// let executeTxResult = await terra.tx.broadcast(executeTx);
 
 let execute = new MsgExecuteContract(
   wallet.key.accAddress, // sender
   contract, // contract account address
   { 
-    approve_bridge: {
-      amount: "53",
+    bridge: {
+      amount: "100",
+      recipient_chain: 1,
+      recipient: "4sF2ejiqy2pSm3Vhq5KUD41BTLfeQXHJo7oezDwdmg5J",
+      nonce: 69,
     } 
   }, // handle msg
 );
+
 let executeTx = await wallet.createAndSignTx({
   msgs: [execute]
 });
 
 let executeTxResult = await terra.tx.broadcast(executeTx);
-
-execute = new MsgExecuteContract(
-  wallet.key.accAddress, // sender
-  contract, // contract account address
-  { 
-    bridge: {
-      amount: "53",
-      recipient_chain: 1,
-      recipient: "4sF2ejiqy2pSm3Vhq5KUD41BTLfeQXHJo7oezDwdmg5J",
-      nonce: 4,
-    } 
-  }, // handle msg
-);
-
-executeTx = await wallet.createAndSignTx({
-  msgs: [execute]
-});
-
-executeTxResult = await terra.tx.broadcast(executeTx);
 
 console.log(executeTxResult)

@@ -54,7 +54,7 @@ pub fn execute(
           => try_update_config(deps, info, pause, owner, receiver, bank, bridge),
         ExecuteMsg::Bridge { amount, recipient_chain, recipient, nonce }
           => try_bridge(deps, info, amount, recipient_chain, recipient, nonce),
-        ExecuteMsg::ApproveBridge { amount } => try_approve( deps, info, amount),
+        // ExecuteMsg::ApproveBridge { amount } => try_approve( deps, info, amount),
     }
 }
 
@@ -114,6 +114,15 @@ pub fn try_bridge(
 
   Ok(Response::new()
     .add_message(CosmosMsg::Wasm(WasmMsg::Execute {
+      contract_addr: token,
+      msg: to_binary(&Cw20ExecuteMsg::IncreaseAllowance {
+        spender: deps.api.addr_humanize(&state.bridge).unwrap().to_string(),
+        amount: amount,
+        expires: None,
+      })?,
+      funds: vec![],
+    }))
+    .add_message(CosmosMsg::Wasm(WasmMsg::Execute {
       contract_addr: deps.api.addr_humanize(&state.bridge).unwrap().to_string(),
       msg: to_binary(&bridge_msg::ExecuteMsg::InitiateTransfer {
         asset,
@@ -127,33 +136,33 @@ pub fn try_bridge(
   )
 }
 
-pub fn try_approve(deps: DepsMut, _info: MessageInfo, amount: Uint128) -> Result<Response, ContractError> {
-  let state : Config = CONFIG.load(deps.storage)?;
+// pub fn try_approve(deps: DepsMut, _info: MessageInfo, amount: Uint128) -> Result<Response, ContractError> {
+//   let state : Config = CONFIG.load(deps.storage)?;
 
-  if state.pause {
-    return Err(ContractError::Paused {});
-  }
+//   if state.pause {
+//     return Err(ContractError::Paused {});
+//   }
 
-  let res : pool_resp::ConfigResponse = deps.querier.query(
-    &QueryRequest::Wasm(WasmQuery::Smart {
-      contract_addr: deps.api.addr_humanize(&state.bank).unwrap().to_string(),
-      msg: to_binary(&pool_msg::QueryMsg::Config {})?,
-    }))?;
+//   let res : pool_resp::ConfigResponse = deps.querier.query(
+//     &QueryRequest::Wasm(WasmQuery::Smart {
+//       contract_addr: deps.api.addr_humanize(&state.bank).unwrap().to_string(),
+//       msg: to_binary(&pool_msg::QueryMsg::Config {})?,
+//     }))?;
 
-  let token = res.dp_token;
+//   let token = res.dp_token;
 
-  Ok(Response::new()
-    .add_message(CosmosMsg::Wasm(WasmMsg::Execute {
-      contract_addr: token,
-      msg: to_binary(&Cw20ExecuteMsg::IncreaseAllowance {
-        spender: deps.api.addr_humanize(&state.bridge).unwrap().to_string(),
-        amount: amount,
-        expires: None,
-      })?,
-      funds: vec![],
-    }))
-  )
-}
+//   Ok(Response::new()
+//     .add_message(CosmosMsg::Wasm(WasmMsg::Execute {
+//       contract_addr: token,
+//       msg: to_binary(&Cw20ExecuteMsg::IncreaseAllowance {
+//         spender: deps.api.addr_humanize(&state.bridge).unwrap().to_string(),
+//         amount: amount,
+//         expires: None,
+//       })?,
+//       funds: vec![],
+//     }))
+//   )
+// }
 
 pub fn try_update_config(
   deps: DepsMut,

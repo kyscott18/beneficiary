@@ -31,7 +31,7 @@ const mk = new MnemonicKey({
 const wallet = terra.wallet(mk);
 
 const result = await terra.wasm.contractQuery(
-  "terra1hdgjwnk059ky8altyfxpdtjzx9v3tpyd47l58r",
+  "terra1hf37ztxxne8tlv6dmzl6370ndyjg8f7sxm6mkr",
   { get_config: { } } // query msg
 );
 
