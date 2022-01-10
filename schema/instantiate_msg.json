@@ -3,14 +3,14 @@
   "title": "InstantiateMsg",
   "type": "object",
   "required": [
-    "receiver",
-    "token"
+    "bank",
+    "receiver"
   ],
   "properties": {
-    "receiver": {
+    "bank": {
       "type": "string"
     },
-    "token": {
+    "receiver": {
       "type": "string"
     }
   }

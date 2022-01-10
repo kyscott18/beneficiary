@@ -3,12 +3,15 @@
   "title": "ConfigResponse",
   "type": "object",
   "required": [
+    "bank",
     "owner",
     "pause",
-    "receiver",
-    "token"
+    "receiver"
   ],
   "properties": {
+    "bank": {
+      "type": "string"
+    },
     "owner": {
       "type": "string"
     },
@@ -16,9 +19,6 @@
       "type": "boolean"
     },
     "receiver": {
-      "type": "string"
-    },
-    "token": {
       "type": "string"
     }
   }

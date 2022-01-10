@@ -1,10 +1,19 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
-use cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
+use cosmwasm_std::{
+  to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult, Coin, CosmosMsg, 
+  WasmMsg, WasmQuery, QueryRequest
+};
+use cosmwasm_bignumber::{Uint256};
 
 use crate::error::ContractError;
-use crate::msg::{ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
+use crate::msg::{BalanceResponse, ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
 use crate::state::{Config, CONFIG};
+use crate::tax_utils::deduct_tax;
+use crate::token_utils::balance_of;
+use crate::pool_msg;
+use crate::pool_resp;
+
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -17,7 +26,7 @@ pub fn instantiate(
       pause: false,
       owner: deps.api.addr_canonicalize(info.sender.as_str())?,
       receiver: deps.api.addr_canonicalize(msg.receiver.as_str())?,
-      token: deps.api.addr_canonicalize(msg.token.as_str())?,
+      bank: deps.api.addr_canonicalize(msg.bank.as_str())?,
     };
 
     CONFIG.save(deps.storage, &config)?;
@@ -34,7 +43,8 @@ pub fn execute(
 ) -> Result<Response, ContractError> {
     match msg {
         ExecuteMsg::Do {} => try_do(deps),
-        ExecuteMsg::UpdateConfig { pause, owner, receiver, token } => try_update_config(deps, info, pause, owner, receiver, token),
+        ExecuteMsg::UpdateConfig { pause, owner, receiver, bank }
+          => try_update_config(deps, info, pause, owner, receiver, bank),
     }
 }
 
@@ -55,7 +65,16 @@ pub fn try_do(deps: DepsMut) -> Result<Response, ContractError> {
     //       amount
     //     }))
     // .add_attribute("method", "try_do"))
-    Ok(Response::new())
+    Ok(Response::new()
+      .add_message(CosmosMsg::Wasm(WasmMsg::Execute {
+        contract_addr: deps
+          .api
+          .addr_humanize(&config.bank)
+          .unwrap()
+          .to_string(),
+        msg: to_binary(&pool_msg::ExecuteMsg::Earn {})?,
+        funds: vec![],
+      })))
 }
 pub fn try_update_config(
   deps: DepsMut,
@@ -63,7 +82,7 @@ pub fn try_update_config(
   pause: Option<bool>,
   owner: Option<String>,
   receiver: Option<String>,
-  token: Option<String>,
+  bank: Option<String>,
 ) -> Result<Response, ContractError> {
     let mut config: Config = CONFIG.load(deps.storage)?;
 
@@ -87,10 +106,10 @@ pub fn try_update_config(
       config.receiver = deps.api.addr_canonicalize(&receiver)?;
     }
 
-    if let Some(token) = token {
-      let _ = deps.api.addr_validate(&token)?;
+    if let Some(bank) = bank {
+      let _ = deps.api.addr_validate(&bank)?;
 
-      config.token = deps.api.addr_canonicalize(&token)?;
+      config.bank = deps.api.addr_canonicalize(&bank)?;
     }
 
     CONFIG.save(deps.storage, &config)?;
@@ -99,9 +118,10 @@ pub fn try_update_config(
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
+pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
         QueryMsg::GetConfig {} => to_binary(&query_config(deps)?),
+        QueryMsg::GetBalance {} => to_binary(&query_balance(deps, env)?),
     }
 }
 
@@ -111,8 +131,41 @@ fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
       pause: state.pause,
       owner: deps.api.addr_humanize(&state.owner)?.to_string(),
       receiver: deps.api.addr_humanize(&state.receiver)?.to_string(),
-      token: deps.api.addr_humanize(&state.token)?.to_string(),
+      bank: deps.api.addr_humanize(&state.bank)?.to_string(),
     })
+}
+
+fn query_balance(deps: Deps, env: Env) -> StdResult<BalanceResponse> {
+  let state : Config = CONFIG.load(deps.storage)?;
+
+  let res : pool_resp::ConfigResponse = deps.querier.query(
+    &QueryRequest::Wasm(WasmQuery::Smart {
+      contract_addr: deps.api.addr_humanize(&state.bank).unwrap().to_string(),
+      msg: to_binary(&pool_msg::QueryMsg::Config {})?,
+    }))?;
+
+  let token = res.anchor_token;
+
+  let token_balance = balance_of(
+    deps,
+    token.clone(),
+    env.contract.address.to_string(),
+  ).unwrap();
+
+  let real_value = Uint256::from(
+    deduct_tax(
+      deps,
+      Coin {
+        denom: token,
+        amount: token_balance.into(),
+      }
+    )?
+    .amount,
+  );
+
+  Ok(BalanceResponse {
+    balance: real_value,
+  })
 }
 
 #[cfg(test)]
@@ -139,7 +192,7 @@ mod tests {
         let res = query(deps.as_ref(), mock_env(), QueryMsg::GetConfig {}).unwrap();
         let value: ConfigResponse = from_binary(&res).unwrap();
         assert_eq!(false, value.pause);
-        asser_eq!("terra1sh36qn08g4cqg685cfzmyxqv2952q6r8gpczrt".to_string(), value.receiver)
+        assert_eq!("terra1sh36qn08g4cqg685cfzmyxqv2952q6r8gpczrt".to_string(), value.receiver)
 
     }
 

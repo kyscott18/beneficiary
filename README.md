@@ -106,8 +106,8 @@ Follow [Gitpod Getting Started](https://www.gitpod.io/docs/getting-started) and 
 
 ### Deployed
 ***Bombay***
-code_id: 32354
+code_id: 32428
 contract addresses: [
-  'terra1n8mxhm0uau2kg7rgdcagp9lywgfmlj3uy0cs7w',
+  'terra1l0nffzpk8w3u9dnzdfwde7gsnczv70wzgmrk73',
 ]
 

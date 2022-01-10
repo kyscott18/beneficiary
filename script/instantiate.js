@@ -1,4 +1,4 @@
-import { LCDClient, MsgExecuteContract, MnemonicKey, isTxError, Coins} from '@terra-money/terra.js';
+import { LCDClient, MsgInstantiateContract, MsgStoreCode, MnemonicKey, isTxError, Coins} from '@terra-money/terra.js';
 import * as fs from 'fs';
 import fetch from 'isomorphic-fetch';
 
@@ -30,28 +30,33 @@ const mk = new MnemonicKey({
 
 const wallet = terra.wallet(mk);
 
-// const execute = new MsgExecuteContract(
-//   wallet.key.accAddress, // sender
-//   "terra1wjqhvta9mm20p6p4u65dq5ckg7774qmw308pq2", // contract account address
-//   { update_config: {token: "terra1mqh0596x4w2vl7ppgka8eu7tht452jss3ky3nx"} }, // handle msg
-// );
+const code_id = 32428; 
 
-// const executeTx = await wallet.createAndSignTx({
-//   msgs: [execute]
-// });
-
-// const executeTxResult = await terra.tx.broadcast(executeTx);
-
-// let result = await terra.wasm.contractQuery(
-//   "terra1wjqhvta9mm20p6p4u65dq5ckg7774qmw308pq2",
-//   { get_config: { } } // query msg
-// );
-
-// console.log(result)
-
-const result = await terra.wasm.contractQuery(
-  "terra1wjqhvta9mm20p6p4u65dq5ckg7774qmw308pq2",
-  { get_balance: { } } // query msg
+const instantiate = new MsgInstantiateContract(
+  wallet.key.accAddress,
+  wallet.key.accAddress,
+  code_id, // code ID
+  {
+    receiver: wallet.key.accAddress,
+    bank: "terra1vt8ln3dn3fu7uceyde6q67annt46cy8jvxwjlq",
+  }, // InitMsg
 );
 
-console.log(result)
+const instantiateTx = await wallet.createAndSignTx({
+  msgs: [instantiate],
+});
+const instantiateTxResult = await terra.tx.broadcast(instantiateTx);
+
+console.log(instantiateTxResult);
+
+if (isTxError(instantiateTxResult)) {
+  throw new Error(
+    `instantiate failed. code: ${instantiateTxResult.code}, codespace: ${instantiateTxResult.codespace}, raw_log: ${instantiateTxResult.raw_log}`
+  );
+}
+
+const {
+  instantiate_contract: { contract_address },
+} = instantiateTxResult.logs[0].eventsByType;
+
+console.log(contract_address)

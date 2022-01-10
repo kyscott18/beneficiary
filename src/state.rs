@@ -9,7 +9,7 @@ pub struct Config {
     pub pause: bool,
     pub owner: CanonicalAddr,
     pub receiver: CanonicalAddr,
-    pub token: CanonicalAddr,
+    pub bank: CanonicalAddr,
 }
 
 pub const CONFIG: Item<Config> = Item::new("config");

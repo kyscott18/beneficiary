@@ -52,39 +52,3 @@ const {
 } = storeCodeTxResult.logs[0].eventsByType;
 
 console.log(code_id)
-
-console.log(wallet.key.accAddress, 'addresser')
-
-const instantiate = new MsgInstantiateContract(
-  wallet.key.accAddress,
-  wallet.key.accAddress,
-  +code_id[0], // code ID
-  {
-    receiver: wallet.key.accAddress,
-    token: wallet.key.accAddress,
-  }, // InitMsg
-);
-
-const instantiateTx = await wallet.createAndSignTx({
-  msgs: [instantiate],
-});
-const instantiateTxResult = await terra.tx.broadcast(instantiateTx);
-
-console.log(instantiateTxResult);
-
-if (isTxError(instantiateTxResult)) {
-  throw new Error(
-    `instantiate failed. code: ${instantiateTxResult.code}, codespace: ${instantiateTxResult.codespace}, raw_log: ${instantiateTxResult.raw_log}`
-  );
-}
-
-const {
-  instantiate_contract: { contract_address },
-} = instantiateTxResult.logs[0].eventsByType;
-
-console.log(contract_address)
-
-const result = await terra.wasm.contractQuery(
-  contract_address[0],
-  { GetConfig: { } } // query msg
-);

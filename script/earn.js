@@ -30,27 +30,28 @@ const mk = new MnemonicKey({
 
 const wallet = terra.wallet(mk);
 
-// const execute = new MsgExecuteContract(
-//   wallet.key.accAddress, // sender
-//   "terra1wjqhvta9mm20p6p4u65dq5ckg7774qmw308pq2", // contract account address
-//   { update_config: {token: "terra1mqh0596x4w2vl7ppgka8eu7tht452jss3ky3nx"} }, // handle msg
-// );
+const contract = "terra1l0nffzpk8w3u9dnzdfwde7gsnczv70wzgmrk73"
 
-// const executeTx = await wallet.createAndSignTx({
-//   msgs: [execute]
-// });
+const execute = new MsgExecuteContract(
+  wallet.key.accAddress, // sender
+  contract, // contract account address
+  { update_config: {token: "terra1mqh0596x4w2vl7ppgka8eu7tht452jss3ky3nx"} }, // handle msg
+);
 
-// const executeTxResult = await terra.tx.broadcast(executeTx);
+const executeTx = await wallet.createAndSignTx({
+  msgs: [execute]
+});
 
-// let result = await terra.wasm.contractQuery(
-//   "terra1wjqhvta9mm20p6p4u65dq5ckg7774qmw308pq2",
-//   { get_config: { } } // query msg
-// );
+const executeTxResult = await terra.tx.broadcast(executeTx);
 
-// console.log(result)
-
-const result = await terra.wasm.contractQuery(
+let result = await terra.wasm.contractQuery(
   "terra1wjqhvta9mm20p6p4u65dq5ckg7774qmw308pq2",
+  { get_config: { } } // query msg
+);
+
+console.log(result)
+result = await terra.wasm.contractQuery(
+  contract,
   { get_balance: { } } // query msg
 );
 
